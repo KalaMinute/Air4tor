@@ -103,7 +103,7 @@ class _AutherState extends State<Auther> {
         decoration: BoxDecoration(
           gradient: RadialGradient(
             colors: <Color>[Colors.white, Mystyle().primaryColor],
-            radius: 0.9,
+            radius: 1.1,
           ),
         ),
         child: Center(
