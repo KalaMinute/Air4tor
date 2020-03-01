@@ -1,5 +1,7 @@
 import 'package:air4tor/utility/my_style.dart';
+import 'package:air4tor/widget/my_service.dart';
 import 'package:air4tor/widget/register.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,7 +13,25 @@ class Auther extends StatefulWidget {
 class _AutherState extends State<Auther> {
 // Field
 
-///////////////////////////////////// Method
+//// Method
+  ///
+  @override 
+  void initState() {
+    super.initState();
+    checkState(); //ตรวจสอบการ login ค้างที่ firebase
+  }
+
+  Future<void> checkState() async {
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    FirebaseUser firebaseUser = await firebaseAuth.currentUser();
+    if (firebaseUser != null) {
+      MaterialPageRoute route =
+          MaterialPageRoute(builder: (BuildContext buildContext) {
+        return MyService();
+      });
+      Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+    }
+  }
 
   Widget newRegisterButton() {
     return FlatButton(
