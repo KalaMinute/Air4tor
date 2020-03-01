@@ -1,4 +1,5 @@
 import 'package:air4tor/utility/my_style.dart';
+import 'package:air4tor/utility/normal_dialog.dart';
 import 'package:air4tor/widget/my_service.dart';
 import 'package:air4tor/widget/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,9 +14,11 @@ class Auther extends StatefulWidget {
 class _AutherState extends State<Auther> {
 // Field
 
+  String user = '', password = '';
+
 //// Method
   ///
-  @override 
+  @override
   void initState() {
     super.initState();
     checkState(); //ตรวจสอบการ login ค้างที่ firebase
@@ -61,15 +64,35 @@ class _AutherState extends State<Auther> {
           'login',
           style: TextStyle(color: Colors.white),
         ),
-        onPressed: () {},
+        onPressed: () {
+          checkAuthen();
+        },
       ),
     );
+  }
+
+  Future<void> checkAuthen() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    await auth
+        .signInWithEmailAndPassword(email: user, password: password)
+        .then((response) {
+          checkState();
+        })
+        .catchError((response) {
+      String title = response.code;
+      String message = response.message;
+      normalDialog(context, title, message);
+    });
   }
 
   Widget userForm() {
     return Container(
       width: 250.0,
       child: TextField(
+        keyboardType: TextInputType.emailAddress,
+        onChanged: (value) {
+          user = value.trim();
+        },
         decoration: InputDecoration(
           enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Mystyle().darkColor)),
@@ -84,6 +107,10 @@ class _AutherState extends State<Auther> {
     return Container(
       width: 250.0,
       child: TextField(
+        obscureText: true,
+        onChanged: (value) {
+          password = value.trim();
+        },
         decoration: InputDecoration(
           enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Mystyle().darkColor)),
