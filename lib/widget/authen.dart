@@ -21,7 +21,7 @@ class _AutherState extends State<Auther> {
             TextStyle(color: Mystyle().darkColor, fontStyle: FontStyle.italic),
       ),
       onPressed: () {
-        print('You Click Register');
+        print('You Click Register'); // โชว์ดูว่ามีการคลิกจริงไหม
 
         MaterialPageRoute route =
             MaterialPageRoute(builder: (BuildContext context) {
