@@ -1,5 +1,7 @@
 import 'package:air4tor/utility/my_style.dart';
 import 'package:air4tor/utility/normal_dialog.dart';
+import 'package:air4tor/widget/my_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
@@ -8,9 +10,10 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  
   //Field
-String name,email,password; // การประกาศตัวแปลที่เป็นค่าว่างคือ Null เพื่อเอามารอรับค่าจากการป้อนที่ keyboard
+  String name,
+      email,
+      password; // การประกาศตัวแปลที่เป็นค่าว่างคือ Null เพื่อเอามารอรับค่าจากการป้อนที่ keyboard
 
   // Method
 
@@ -22,9 +25,11 @@ String name,email,password; // การประกาศตัวแปลท�
       children: <Widget>[
         Container(
           width: 250.0,
-          child: TextField(onChanged: (String string){ // 
-            name = string.trim(); // trim คืออการตัดหน้าหลัง
-          },
+          child: TextField(
+            onChanged: (String string) {
+              //
+              name = string.trim(); // trim คืออการตัดหน้าหลัง
+            },
             decoration: InputDecoration(
               enabledBorder:
                   UnderlineInputBorder(borderSide: BorderSide(color: color2)),
@@ -53,10 +58,13 @@ String name,email,password; // การประกาศตัวแปลท�
       children: <Widget>[
         Container(
           width: 250.0,
-          child: TextField(onChanged: (String string){  // onChange คือการเก้บค่าจากการป้อน
-            email = string.trim();   // การเก็นค่ามาไว้ในตัวแปล
-          },
-            keyboardType: TextInputType.emailAddress, // ทำให้แป้นคีบอร์ดที่โผล่มาเป็นหน้าที่มีเครื่องมหาย@
+          child: TextField(
+            onChanged: (String string) {
+              // onChange คือการเก้บค่าจากการป้อน
+              email = string.trim(); // การเก็นค่ามาไว้ในตัวแปล
+            },
+            keyboardType: TextInputType
+                .emailAddress, // ทำให้แป้นคีบอร์ดที่โผล่มาเป็นหน้าที่มีเครื่องมหาย@
             decoration: InputDecoration(
               enabledBorder:
                   UnderlineInputBorder(borderSide: BorderSide(color: color2)),
@@ -86,9 +94,10 @@ String name,email,password; // การประกาศตัวแปลท�
       children: <Widget>[
         Container(
           width: 250.0,
-          child: TextField(onChanged: (String string){
-            password = string.trim();
-          },
+          child: TextField(
+            onChanged: (String string) {
+              password = string.trim();
+            },
             decoration: InputDecoration(
               enabledBorder:
                   UnderlineInputBorder(borderSide: BorderSide(color: color2)),
@@ -116,25 +125,64 @@ String name,email,password; // การประกาศตัวแปลท�
       margin: EdgeInsets.only(top: 30.0), //ระยะห่างจากตัวข้างบน
       width: 250.0,
       child: OutlineButton(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)), // ปรับความมนของปุ่ม
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0)), // ปรับความมนของปุ่ม
         borderSide: BorderSide(color: Mystyle().darkColor), // สีขอบของปุ่ม
-        child: Text('Regiter',style: TextStyle(color: Mystyle().darkColor),), //อักษรและสีอักษร
-        onPressed: () {  // เมื่อมีการกดปุ่ม
-          print('name = $name,email = $email,password = $password'); // ลองโชว์ดูว่าเมื่อกดปุ่มแล้วมันรับค่ามาได้รึยัง
-          
-          if (name == null||name.isEmpty ||
-              email == null || email.isEmpty || 
-              password == null || password.isEmpty) { 
-             // ต้องตรวจทั้งช่องว่าง(การป้อนแล้วลบ)และค่าว่าง null เช่น name == null||name.isEmpty
-            normalDialog(context, 'Have Space', 'Please Fill Every Blank'); // คือการเด้งแจ้งเตือนไม่กรอก
-          } else {
+        child: Text(
+          'Regiter',
+          style: TextStyle(color: Mystyle().darkColor),
+        ), //อักษรและสีอักษร
+        onPressed: () {
+          // เมื่อมีการกดปุ่ม
+          print(
+              'name = $name,email = $email,password = $password'); // ลองโชว์ดูว่าเมื่อกดปุ่มแล้วมันรับค่ามาได้รึยัง
 
+          if (name == null ||
+              name.isEmpty ||
+              email == null ||
+              email.isEmpty ||
+              password == null ||
+              password.isEmpty) {
+            // ต้องตรวจทั้งช่องว่าง(การป้อนแล้วลบ)และค่าว่าง null เช่น name == null||name.isEmpty
+            normalDialog(context, 'Have Space',
+                'Please Fill Every Blank'); // คือการเด้งแจ้งเตือนไม่กรอก
+          } else {
+            registerThread();
           }
-          
         },
       ),
     );
+  }
+
+  Future<void> registerThread() async {
+    // เชื่อมต่อกับ firebase เพื่อเก็บค่า email กับ pass และตรวจสอบการป้อน
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    await firebaseAuth
+        .createUserWithEmailAndPassword(email: email, password: password)
+        .then((response) {
+      print('Register Success');
+      setupDisplayName();
+    }).catchError((response) {
+      String title = response.code;
+      String message = response.message;
+      normalDialog(context, title, message);
+    });
+  }
+
+  Future<void> setupDisplayName() async {
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    FirebaseUser firebaseUser = await firebaseAuth.currentUser();
+    UserUpdateInfo userUpdateInfo = UserUpdateInfo();
+    userUpdateInfo.displayName = name;
+    firebaseUser.updateProfile(userUpdateInfo);
+
+    MaterialPageRoute route =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return MyService();
+    });
+    Navigator.of(context).pushAndRemoveUntil(route, (Route<dynamic> route) {
+     return false;
+    });
   }
 
   /////////////////////////////////
